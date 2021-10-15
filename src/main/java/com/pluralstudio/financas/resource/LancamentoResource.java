@@ -70,4 +70,18 @@ public class LancamentoResource {
         return lancamento;
     }
 
+    @DeleteMapping("{id}")
+    public ResponseEntity deletar(@PathVariable("id") Long id){
+        return service.obterPorId(id).map(entidade -> {
+            try {
+                service.deletar(entidade);
+                return new ResponseEntity(HttpStatus.NO_CONTENT);
+            }
+            catch (RegraNegocioException e){
+                return ResponseEntity.badRequest().body(e.getMessage());
+            }
+        }).orElseGet(() ->
+                new ResponseEntity("Lançamento não encontrado na base de dados.",HttpStatus.BAD_REQUEST));
+
+    }
 }
