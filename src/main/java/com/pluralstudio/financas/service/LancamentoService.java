@@ -3,6 +3,7 @@ package com.pluralstudio.financas.service;
 import com.pluralstudio.financas.model.entities.Lancamento;
 import com.pluralstudio.financas.model.enuns.StatusLancamento;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,4 +16,5 @@ public interface LancamentoService {
     void atualizarStatus(Lancamento lancamento, StatusLancamento statusLancamento);
     void validar(Lancamento lancamento);
     Optional<Lancamento> obterPorId(Long id);
+    BigDecimal obterSaldoPorUsuario(Long id);
 }

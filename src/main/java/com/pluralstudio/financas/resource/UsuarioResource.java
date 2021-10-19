@@ -4,21 +4,23 @@ import com.pluralstudio.financas.api.dto.UsuarioDTO;
 import com.pluralstudio.financas.exceptions.ErroAutenticacao;
 import com.pluralstudio.financas.exceptions.RegraNegocioException;
 import com.pluralstudio.financas.model.entities.Usuario;
+import com.pluralstudio.financas.service.LancamentoService;
 import com.pluralstudio.financas.service.UsuarioService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/usuarios")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UsuarioResource {
 
-    private UsuarioService service;
+    private final UsuarioService service;
+    private final LancamentoService lancamentoService;
 
     @PostMapping
     public ResponseEntity salvar( @RequestBody UsuarioDTO dto){
@@ -50,6 +52,19 @@ public class UsuarioResource {
         catch (ErroAutenticacao e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping("{id}/saldo")
+    public ResponseEntity obterSaldo(@PathVariable("id") Long id){
+        Optional<Usuario> usuario =service.obterUsuarioPorId(id);
+
+        if(!usuario.isPresent()){
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        }
+
+        BigDecimal saldo = lancamentoService.obterSaldoPorUsuario(id);
+        return ResponseEntity.ok(saldo);
+
     }
 
 

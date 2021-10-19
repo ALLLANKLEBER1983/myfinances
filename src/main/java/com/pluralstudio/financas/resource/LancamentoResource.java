@@ -1,5 +1,6 @@
 package com.pluralstudio.financas.resource;
 
+import com.pluralstudio.financas.api.dto.AtualizaStatusDTO;
 import com.pluralstudio.financas.api.dto.LancamentoDTO;
 import com.pluralstudio.financas.exceptions.RegraNegocioException;
 import com.pluralstudio.financas.model.entities.Lancamento;
@@ -8,7 +9,7 @@ import com.pluralstudio.financas.model.enuns.StatusLancamento;
 import com.pluralstudio.financas.model.enuns.TipoLancamento;
 import com.pluralstudio.financas.service.LancamentoService;
 import com.pluralstudio.financas.service.UsuarioService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,18 +19,19 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/lancamento")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class LancamentoResource {
 
-    private LancamentoService service;
+    private final LancamentoService service;
 
-    private UsuarioService usuarioService;
+    private final UsuarioService usuarioService;
 
+    @PostMapping
     public ResponseEntity salvar(@RequestBody LancamentoDTO dto){
         try {
             Lancamento entidade = converter(dto);
             entidade = service.salvar(entidade);
-            return new  ResponseEntity(entidade, HttpStatus.CREATED);
+            return ResponseEntity.ok(entidade);
         }
         catch (RegraNegocioException e){
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -53,6 +55,27 @@ public class LancamentoResource {
 
     }
 
+    @PutMapping("{id}/atualiza-status")
+    public ResponseEntity atualizarStatus(@PathVariable Long id,@RequestBody AtualizaStatusDTO dto){
+
+        return  service.obterPorId(id).map( entity -> {
+            StatusLancamento statusSelecionado = StatusLancamento.valueOf(dto.getStatus());
+            if (statusSelecionado == null){
+                return ResponseEntity.badRequest().body("Não foi possível o status do lançamento, envie um status válido");
+            }
+            try {
+                entity.setStatus(statusSelecionado);
+                service.atualizar(entity);
+                return ResponseEntity.ok(entity);
+            }
+            catch (RegraNegocioException e){
+                return ResponseEntity.badRequest().body(e.getMessage());
+            }
+
+        }).orElseGet( () -> new ResponseEntity("Lançamento não encontrado na base de dados.",HttpStatus.BAD_REQUEST) );
+
+    }
+
     private Lancamento converter(LancamentoDTO dto){
         Lancamento lancamento = new Lancamento();
         lancamento.setId(dto.getId());
@@ -61,14 +84,17 @@ public class LancamentoResource {
         lancamento.setMes(dto.getMes());
         lancamento.setValor(dto.getValor());
 
-        Usuario usuario = usuarioService.obterUsuarioPorId
-                (dto.getId()).orElseThrow
-                (() ->
-                        new RegraNegocioException("Usuário não encontrado para o Id informado "));
+        Usuario usuario = usuarioService
+                .obterUsuarioPorId(dto.getUsuario())
+                .orElseThrow(() ->new RegraNegocioException("Usuário não encontrado para o Id informado "));
 
         lancamento.setUsuario(usuario);
-        lancamento.setTipo(TipoLancamento.valueOf(dto.getTipo()));
-        lancamento.setStatus(StatusLancamento.valueOf(dto.getStatus()));
+        if(dto.getTipo() != null) {
+            lancamento.setTipo(TipoLancamento.valueOf(dto.getTipo()));
+        }
+        if(dto.getStatus() != null) {
+            lancamento.setStatus(StatusLancamento.valueOf(dto.getStatus()));
+        }
 
         return lancamento;
     }

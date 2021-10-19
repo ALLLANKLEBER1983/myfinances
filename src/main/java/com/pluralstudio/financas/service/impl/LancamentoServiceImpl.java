@@ -3,6 +3,7 @@ package com.pluralstudio.financas.service.impl;
 import com.pluralstudio.financas.exceptions.RegraNegocioException;
 import com.pluralstudio.financas.model.entities.Lancamento;
 import com.pluralstudio.financas.model.enuns.StatusLancamento;
+import com.pluralstudio.financas.model.enuns.TipoLancamento;
 import com.pluralstudio.financas.model.repository.LancamentoRepository;
 import com.pluralstudio.financas.service.LancamentoService;
 import lombok.AllArgsConstructor;
@@ -95,5 +96,22 @@ public class LancamentoServiceImpl implements LancamentoService {
     @Override
     public Optional<Lancamento> obterPorId(Long id) {
         return repository.findById(id);
+    }
+
+    @Override
+    @Transactional
+    public BigDecimal obterSaldoPorUsuario(Long id) {
+        BigDecimal receitas = repository.obterSaldoPorTipoLancamentoEUsuario(id,TipoLancamento.RECEITA.name());
+        BigDecimal despesas = repository.obterSaldoPorTipoLancamentoEUsuario(id,TipoLancamento.DESPESA.name());
+
+        if(receitas == null){
+            receitas = BigDecimal.ZERO;
+        }
+
+        if(despesas == null){
+            despesas = BigDecimal.ZERO;
+        }
+
+        return receitas.subtract(despesas);
     }
 }
