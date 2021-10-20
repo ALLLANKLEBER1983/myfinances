@@ -6,6 +6,8 @@ import com.pluralstudio.financas.exceptions.RegraNegocioException;
 import com.pluralstudio.financas.model.entities.Usuario;
 import com.pluralstudio.financas.service.LancamentoService;
 import com.pluralstudio.financas.service.UsuarioService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,12 +19,15 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/usuarios")
 @RequiredArgsConstructor
+@Api(value = "API REST Usuario")
+@CrossOrigin(origins = "*")
 public class UsuarioResource {
 
     private final UsuarioService service;
     private final LancamentoService lancamentoService;
 
     @PostMapping
+    @ApiOperation(value = "Salva os usuários")
     public ResponseEntity salvar( @RequestBody UsuarioDTO dto){
         Usuario usuario = Usuario
                 .builder()
@@ -44,6 +49,7 @@ public class UsuarioResource {
     }
 
     @PostMapping("/autenticar")
+    @ApiOperation(value = "Verifica se o usuário tem permissão para acessar")
     public ResponseEntity autenticar(@RequestBody UsuarioDTO dto){
         try {
             Usuario usuarioAutenticado = service.autenticar(dto.getEmail(),dto.getSenha());
@@ -55,6 +61,7 @@ public class UsuarioResource {
     }
 
     @GetMapping("{id}/saldo")
+    @ApiOperation(value = "Retorna o saldo do usuário")
     public ResponseEntity obterSaldo(@PathVariable("id") Long id){
         Optional<Usuario> usuario =service.obterUsuarioPorId(id);
 

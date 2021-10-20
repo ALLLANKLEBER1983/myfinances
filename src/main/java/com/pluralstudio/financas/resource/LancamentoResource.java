@@ -9,6 +9,8 @@ import com.pluralstudio.financas.model.enuns.StatusLancamento;
 import com.pluralstudio.financas.model.enuns.TipoLancamento;
 import com.pluralstudio.financas.service.LancamentoService;
 import com.pluralstudio.financas.service.UsuarioService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,8 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/lancamento")
 @RequiredArgsConstructor
+@Api(value = "API REST Lançamento")
+@CrossOrigin(origins = "*")
 public class LancamentoResource {
 
     private final LancamentoService service;
@@ -27,6 +31,7 @@ public class LancamentoResource {
     private final UsuarioService usuarioService;
 
     @PostMapping
+    @ApiOperation(value = "Salva os lançamentos")
     public ResponseEntity salvar(@RequestBody LancamentoDTO dto){
         try {
             Lancamento entidade = converter(dto);
@@ -40,6 +45,7 @@ public class LancamentoResource {
     }
 
     @PutMapping("{id}")
+    @ApiOperation(value = "Atualiza os lançamentos")
     public ResponseEntity atualizar(@PathVariable("id") Long id,@RequestBody LancamentoDTO dto){
        return service.obterPorId(id).map(entity -> {
            try {
@@ -56,6 +62,7 @@ public class LancamentoResource {
     }
 
     @PutMapping("{id}/atualiza-status")
+    @ApiOperation(value = "Salva o status do lançamento")
     public ResponseEntity atualizarStatus(@PathVariable Long id,@RequestBody AtualizaStatusDTO dto){
 
         return  service.obterPorId(id).map( entity -> {
@@ -100,6 +107,7 @@ public class LancamentoResource {
     }
 
     @DeleteMapping("{id}")
+    @ApiOperation(value = "Deleta os lançamentos")
     public ResponseEntity deletar(@PathVariable("id") Long id){
         return service.obterPorId(id).map(entidade -> {
             try {
@@ -115,6 +123,7 @@ public class LancamentoResource {
     }
 
     @GetMapping
+    @ApiOperation(value = "Retorna os lançamentos")
     public ResponseEntity buscar(
             @RequestParam(value = "descricao",required = false) String descricao,
             @RequestParam(value = "mes",required = false) Integer mes,
