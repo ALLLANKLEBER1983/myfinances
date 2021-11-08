@@ -21,7 +21,7 @@ import java.util.Optional;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
-public class LançamentoRepositoryTest {
+public class LancamentoRepositoryTest {
 
     @Autowired
     LancamentoRepository repository;
@@ -80,7 +80,7 @@ public class LançamentoRepositoryTest {
         assertThat(lancamentoEncntrado.isPresent()).isTrue();
     }
 
-    private Lancamento deveCriarUmLancamento(){
+    public static Lancamento deveCriarUmLancamento(){
         return Lancamento.builder()
                 .ano(2019)
                 .descricao("lancamento qualquer")
